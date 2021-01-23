@@ -7,29 +7,10 @@ from constants import *
 from https import *
 import sqlite3
 import requests
-import emoji
 
 def contacting(update, context):
     print('Контакт получен')
     verification(update, context)
-
-def resend_code(update, context):
-    user_id = update.message.chat_id
-    number = update.message.contact.phone_number
-    conn = sqlite3.connect('adminfile/database.sqlite')
-    cursor = conn.cursor()
-    code_in_table = cursor.execute('''
-                            select CODE
-                            from Users
-                            where TELEGRAM_ID = '{}'
-                        '''.format(user_id)).fetchall()
-    code_in_table = (code_in_table[0][0])
-    requests.post(SMS_URL, data={'token': sms_token,
-                                 'sms_phone': '{}'.format(number),
-                                 'sms_text': '{}'.format(code_in_table)})
-    smile = emoji.emojize(":exploding_head:")
-    typing(update, context)
-    context.bot.send_message(chat_id=user_id, text='Код был выслан вам снова. Если код всё ещё не получен - не печальтесь! Обратитесь к @ItskovR - он вас утешит, расскажет анекдот и возможно даже даст вам доступ {}'.format(smile))
 
 def verification(update, context):
     user_id = update.message.chat_id
@@ -47,8 +28,6 @@ def verification(update, context):
                                  'sms_text': '{}'.format(code_in_table)})
     typing(update,context)
     context.bot.send_message(chat_id=user_id, text='Вам на номер телефона пришёл код. Введите его пожалуйста.')
-    butt = InlineKeyboardButton(text='Код не пришёл(', callback_data='resend_code')
-    context.bot.send_message(text='Код не пришел', chat_id=user_id, reply_markup=InlineKeyboardMarkup([butt]))
     print('Смс отправлено на номер {}'.format(number))
     print('Код: {}'.format(code_in_table))
     cursor.execute('''
@@ -106,7 +85,7 @@ def hello(update, context):
     context.bot.send_message(chat_id=update.message.chat_id,
                              text=next_msg)
     cont_butt = [KeyboardButton(text='Скинуть контакт',callback_data='contact', request_contact=True)]
-    context.bot.send_message(chat_id=user_id, text='После этого - весь функционал будет доступен', reply_markup=ReplyKeyboardMarkup([cont_butt]))
+    context.bot.send_message(chat_id=user_id, text='После этого - весь функционал будет доступен', reply_markup=ReplyKeyboardMarkup([cont_butt], one_time_keyboard=True, resize_keyboard=True))
 
 
 def buttons(update, context):
@@ -161,7 +140,9 @@ def t_answ(update, context):
                                     SET CODE_STADIA_ID = 1
                                     WHERE TELEGRAM_ID ={}'''.format(user_id))
             conn.commit()
-            context.bot.send_message(chat_id=user_id, reply_markup=ReplyKeyboardMarkup([]))
+            time.sleep(3)
+            for id in range((update.message.message_id-50), update.message.message_id):
+                context.bot.delete_message(chat_id=user_id, message_id=id)
             buttons(update, context)
         elif int(user_message) != int(code_in_table):
             context.bot.send_message(chat_id=user_id, text='Код неверный. Перепроверьте код.')

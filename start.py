@@ -12,8 +12,6 @@ dispatcher.add_handler(CommandHandler('buttons', buttons, run_async=True))
 
 dispatcher.add_handler(MessageHandler(Filters.contact, callback=contacting))
 
-dispatcher.add_handler(CallbackQueryHandler(pattern='resend_code',callback=resend_code))
-
 dispatcher.add_handler(CallbackQueryHandler(pattern='pht1',callback=pht1))
 
 dispatcher.add_handler(CallbackQueryHandler(pattern='pht2',callback=pht2))
