@@ -26,8 +26,17 @@ prpd_pht = 'Немого зажатый, но лучший'
 rand_tex = 'Ваше рандомное число: '
 
 # Токены
-sms_token = 'Roman:918812496063'
+sms_token = 'Makhmood:7777777'
 
 TOKEN = '1521073304:AAGIjNnvELR8njloCf0U7wZdOXJR-sMpXL0'
 
 SMS_URL = 'https://api.tehnikum.school/sms/sms.php'
+
+# QR
+QR_URL = 'api.qrserver.com/v1/create-qr-code/?size=1500x1500&data=Your TELEGRAM ID : {}'
+
+#Loc
+Loc_Api = 'c6e76d4f-0205-49f5-b75b-91067f1acd42'
+
+#Small-talk
+ST_Api = ''

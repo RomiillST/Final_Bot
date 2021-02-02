@@ -7,10 +7,13 @@ from constants import *
 from https import *
 import sqlite3
 import requests
+from loc_requests import *
+import apiai, json
 
 def contacting(update, context):
     print('Контакт получен')
     verification(update, context)
+
 
 def verification(update, context):
     user_id = update.message.chat_id
@@ -80,13 +83,21 @@ def hello(update, context):
                 insert into Users values ('{}', '{}', 0, '{}', 0)
                 '''.format(int(user_id), str(name), x))
         conn.commit()
-
-    typing(update, context)
-    context.bot.send_message(chat_id=update.message.chat_id,
-                             text=next_msg)
-    cont_butt = [KeyboardButton(text='Скинуть контакт',callback_data='contact', request_contact=True)]
-    context.bot.send_message(chat_id=user_id, text='После этого - весь функционал будет доступен', reply_markup=ReplyKeyboardMarkup([cont_butt], one_time_keyboard=True, resize_keyboard=True))
-
+    code_stage = cursor.execute('''
+                               select CODE_STADIA_ID
+                               from Users
+                               where TELEGRAM_ID = '{}'
+                           '''.format(user_id)).fetchall()
+    code_stage = code_stage[0][0]
+    print(code_stage)
+    if code_stage == 0:
+        typing(update, context)
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text=next_msg)
+        cont_butt = [KeyboardButton(text='Скинуть контакт',callback_data='contact', request_contact=True)]
+        context.bot.send_message(chat_id=user_id, text='После этого - весь функционал будет доступен', reply_markup=ReplyKeyboardMarkup([cont_butt], one_time_keyboard=True, resize_keyboard=True))
+    else:
+        buttons(update, context)
 
 def buttons(update, context):
     typing(update, context)
@@ -102,10 +113,17 @@ def buttons(update, context):
     bot_buttons_list = [
         InlineKeyboardButton(text='Рандомное число!', callback_data='randomize')
     ]
+    bot_bot_buttons_list = [
+        InlineKeyboardButton(text='Мой телеграм ID', callback_data='tg_id')
+    ]
     context.bot.send_message(chat_id=user_id,
                              text='Чего желаете?',
-                             reply_markup=InlineKeyboardMarkup([top_buttons_list, mid_buttons_list, bot_buttons_list]))
-
+                             reply_markup=InlineKeyboardMarkup([top_buttons_list, mid_buttons_list, bot_buttons_list, bot_bot_buttons_list]))
+    loc_butt = [
+        KeyboardButton(text='Узнать свой адрес', request_location=True)
+    ]
+    typing(update, context)
+    context.bot.send_message(chat_id=user_id, text='Кнопки - бывают разные)', reply_markup=ReplyKeyboardMarkup([loc_butt],resize_keyboard=True))
 
 def t_answ(update, context):
     user_id = update.message.chat_id
@@ -141,8 +159,11 @@ def t_answ(update, context):
                                     WHERE TELEGRAM_ID ={}'''.format(user_id))
             conn.commit()
             time.sleep(3)
-            for id in range((update.message.message_id-50), update.message.message_id):
-                context.bot.delete_message(chat_id=user_id, message_id=id)
+            try:
+                for id in range((update.message.message_id-50), update.message.message_id):
+                    context.bot.delete_message(chat_id=user_id, message_id=id)
+            except:
+                print('Не получилось(')
             buttons(update, context)
         elif int(user_message) != int(code_in_table):
             context.bot.send_message(chat_id=user_id, text='Код неверный. Перепроверьте код.')
@@ -157,7 +178,7 @@ def p_answ(update, context):
     user_id = update.message.chat_id
     photo_id = update.message.photo[-1].file_id
     file = context.bot.getFile(photo_id)
-    x = ('photos/' + str(user_id) + str(time.localtime()) + '.jpg')
+    x = ('photos/'+ str(user_id) + str(randint(0, 999)) + str(randint(0, 999)) + '.jpg')
     file.download(x)
     file.close()
     typing(update, context)
@@ -258,3 +279,14 @@ def admin(update, context):
     file = open('adminfile/users.txt', 'rb')
     context.bot.send_document(chat_id=chat_id,
                               document=file)
+
+def your_id(update, context):
+    context.bot.send_photo(photo=QR_URL.format(update.callback_query.from_user.id),
+                           chat_id=update.callback_query.from_user.id)
+
+def location(update, context):
+    message = update.message
+    current_position = (message.location.longitude, message.location.latitude)
+    coords = f"{current_position[0]},{current_position[1]}"
+    address_str = get_address_from_coords(coords)
+    update.message.reply_text(address_str)

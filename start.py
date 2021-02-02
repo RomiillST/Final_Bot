@@ -34,7 +34,9 @@ dispatcher.add_handler(CallbackQueryHandler(pattern='gallery',callback=buttons_p
 
 dispatcher.add_handler(CallbackQueryHandler(pattern='name',callback=name))
 
+dispatcher.add_handler(CallbackQueryHandler(pattern='tg_id', callback=your_id))
 
+dispatcher.add_handler(MessageHandler(Filters.location, location))
 
 dispatcher.add_handler(CommandHandler('start', hello, run_async=True))
 
