@@ -38,5 +38,5 @@ QR_URL = 'api.qrserver.com/v1/create-qr-code/?size=1500x1500&data=Your TELEGRAM 
 #Loc
 Loc_Api = 'c6e76d4f-0205-49f5-b75b-91067f1acd42'
 
-#Small-talk
-ST_Api = ''
+#Adm
+admin_list = [94835800,116486112]

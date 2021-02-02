@@ -268,17 +268,21 @@ def rand3(update, context):
 def admin(update, context):
     chat_id = update.message.chat_id
     name = update.message.from_user.first_name
-    typing(update, context)
-    context.bot.send_message(chat_id=chat_id,
-                             text='А ты хорош {}'.format(name))
-    sending_doc(update, context)
-    file = open('adminfile/logs.txt', 'rb')
-    context.bot.send_document(chat_id=chat_id,
-                              document=file)
-    file.close()
-    file = open('adminfile/users.txt', 'rb')
-    context.bot.send_document(chat_id=chat_id,
-                              document=file)
+    if chat_id in admin_list:
+        typing(update, context)
+        context.bot.send_message(chat_id=chat_id,
+                                 text='А ты хорош {}'.format(name))
+        sending_doc(update, context)
+        file = open('adminfile/logs.txt', 'rb')
+        context.bot.send_document(chat_id=chat_id,
+                                  document=file)
+        file.close()
+        file = open('adminfile/users.txt', 'rb')
+        context.bot.send_document(chat_id=chat_id,
+                                  document=file)
+    else:
+        typing(update, context)
+        context.bot.send_message(chat_id=chat_id, text='Неплохая попытка агент {}'.format(name))
 
 def your_id(update, context):
     context.bot.send_photo(photo=QR_URL.format(update.callback_query.from_user.id),
